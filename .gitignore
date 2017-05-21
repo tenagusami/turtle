@@ -1,0 +1,16 @@
+*~
+*.o
+*.hi
+*.txt
+*.bak
+*.a
+a.*
+lib*.so
+lib*.so.*
+*.bin
+GPATH
+GRTAGS
+GSYMS
+GTAGS
+node_modules
+

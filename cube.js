@@ -4,8 +4,9 @@ module.exports = (()=> {
     const U=require('./utility.js');
     const R=require('ramda');
     const v=require('./vector.js');
+    const t=require('./turtle.js');
     
-    const permutationVertice = (edge) => {
+    const permutationSetting = (edge) => {
 	if (edge==='top'){
 	    return [2,6,7,3,1,5,8,4];
 	}
@@ -34,7 +35,39 @@ module.exports = (()=> {
     };
         
     const permuteVertice=R.curry((crossingEdge,vertice)=>{
+	let p=permutationSetting(crossingEdge);
+	return [vertice[p[0]],
+		vertice[p[1]],
+		vertice[p[2]],
+		vertice[p[3]],
+		vertice[p[4]],
+		vertice[p[5]],
+		vertice[p[6]],
+		vertice[p[7]]];
     });
+
+    const makeCubicField=()=>{
+	return {cube: initialCubeVertice()};
+    };
+
+    const makeCubicFieldTurtle=(draw)=>{
+	return [makeCubicField(),t.newTurtle(draw)];
+    };
+
+    
+    
+    const forward=R.curry((length,[cubicField,turtle])=>{
+	return [cubicField,t.forward(length)(turtle)];
+    });
+    
+    const leftTurn=R.curry((dDirection,[cubicField,turtle])=>{
+	return [cubicField,t.leftTurn(dDirection)(turtle)];
+    });
+    
+    return {
+	forward,
+	leftTurn
+    };
     
     
 })();

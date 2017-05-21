@@ -155,7 +155,7 @@ module.exports = (()=>{
   //const moveTurtle=v.gspiro(10,[90],9,[4]);
   //const moveTurtle=v.gospel(100,[40]);
   //const moveTurtle=tp.scissor(100,40);
-  const moveTurtle=tp.scissorPoly(100,144,100);
+  const moveTurtle=tp.scissorPoly(100,80,100);
 
 
 

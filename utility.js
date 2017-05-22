@@ -18,11 +18,17 @@ module.exports = (()=>{
   const rMathModulo = R.curry((modulus,dividend)=>{
     return dividend-modulus*math.floor(dividend/modulus);
   });
-  
+
+    const isOnInterval= R.curry((intervalMin,intervalMax,x)=>{
+	return x>=intervalMin && x<=intervalMax;
+    });
+
   return {
     copyVector: copyVector,
-    intList:intList,
+      intList:intList,
+      isOnInterval: isOnInterval,
     randomR: randomR,
     rMathModulo: rMathModulo
   };
+   
 })();

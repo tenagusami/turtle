@@ -26,7 +26,8 @@ module.exports = (()=>{
       C.addPosition(position,C.shiftVector(distance,direction)));
   });
   
-  return {
+    return {
+	
     makeField: makeField,
     isMovable: isMovable,
     isMovablePosition: isMovablePosition

@@ -3,6 +3,7 @@
 module.exports = (()=> {
     const U=require('./utility.js');
     const R=require('ramda');
+    const C=require('./coordinate.js');
     const v=require('./vector.js');
     const t=require('./turtle.js');
     
@@ -22,51 +23,161 @@ module.exports = (()=> {
 	return[];
     };
 
-    const initialCubeVertice = ()=>{
+    const initialCubeVertices = ()=>{
 	return [1,2,3,4,5,6,7,8];
     };
 
-    const frontVertice=(vertice)=>{
-	return [vertice[0],vertice[1],vertice[2],vertice[3]];
+    const frontVertices=(vertices)=>{
+	return [vertices[0],vertices[1],vertices[2],vertices[3]];
     };
 
-    const backVertice=(vertice)=>{
-	return [vertice[4],vertice[5],vertice[6],vertice[7]];
+    const backVertices=(vertices)=>{
+	return [vertices[4],vertices[5],vertices[6],vertices[7]];
     };
         
-    const permuteVertice=R.curry((crossingEdge,vertice)=>{
-	let p=permutationSetting(crossingEdge);
-	return [vertice[p[0]],
-		vertice[p[1]],
-		vertice[p[2]],
-		vertice[p[3]],
-		vertice[p[4]],
-		vertice[p[5]],
-		vertice[p[6]],
-		vertice[p[7]]];
+    const permuteVertices=R.curry((crossingEdgeName,vertices)=>{
+	let p=permutationSetting(crossingEdgeName);
+	return [vertices[p[0]-1],
+		vertices[p[1]-1],
+		vertices[p[2]-1],
+		vertices[p[3]-1],
+		vertices[p[4]-1],
+		vertices[p[5]-1],
+		vertices[p[6]-1],
+		vertices[p[7]-1]];
     });
 
-    const makeCubicField=()=>{
-	return {cube: initialCubeVertice()};
+    const crossingEdgeIndex2Name=(crossingEdgeIndex)=>{
+	if(crossingEdgeIndex===0){return 'left';}
+	if(crossingEdgeIndex===1){return 'top';}
+	if(crossingEdgeIndex===2){return 'right';}
+	if(crossingEdgeIndex===3){return 'bottom';}
+	return 'none';
     };
 
-    const makeCubicFieldTurtle=(draw)=>{
-	return [makeCubicField(),t.newTurtle(draw)];
-    };
-
-    
-    
-    const forward=R.curry((length,[cubicField,turtle])=>{
-	return [cubicField,t.forward(length)(turtle)];
+    const shuffleVertices=R.curry((crossingEdgeIndex,field)=>{
+	return makeCubicField(
+	    field.edgeLength,
+	    permuteVertices(crossingEdgeIndex2Name(crossingEdgeIndex))
+	    (field.vertices),
+	    field.edgeVectors);	    
     });
     
-    const leftTurn=R.curry((dDirection,[cubicField,turtle])=>{
-	return [cubicField,t.leftTurn(dDirection)(turtle)];
+    const makeCubicField=(edgeLength,vertices,edgeVectors)=>{
+	return {
+	    edgeLength: edgeLength,
+	    vertices: vertices,
+	    edgeVectors: edgeVectors
+	};
+    };
+
+    const makeNewCubicFieldTurtle=R.curry((length,initial2DPosition,draw)=>{
+	return [makeCubicField
+		(length,initialCubeVertices(),makeEdgeVectors(length)),
+		t.shiftPosition(initial2DPosition)(t.newTurtle(draw))];
+    });
+
+    const vertices2DCoordinate = (length)=>{
+	return [[0,0],[0,length],[length,length],[length,0]];
+    };
+    
+    const edgeVector = R.curry(
+	(vertices2DPosition,vertexIndex1,vertexIndex2)=>{
+	    return {
+		startPosition: vertices2DPosition[vertexIndex1],
+		shift: C.vectorTo(
+		    vertices2DPosition[vertexIndex1],
+		    vertices2DPosition[vertexIndex2])};
+	});
+    
+    const makeEdgeVectors = (edgeLength)=>{
+	const vertices2DPosition=vertices2DCoordinate(edgeLength);
+	return [edgeVector(vertices2DPosition,0,1),
+		edgeVector(vertices2DPosition,1,2),
+		edgeVector(vertices2DPosition,2,3),
+		edgeVector(vertices2DPosition,3,0)];
+    };
+
+    const makeCrossReporter=R.curry((willCross,edgeIndex,fraction)=>{
+	return {intersect: willCross,
+		edgeIndex: edgeIndex,
+		fraction: fraction};
+    });
+
+    const makeNoCrossReporter=()=>{
+	return makeCrossReporter(false,-1,-1);
+    };
+    
+    const willCrossEdge=R.curry((edgeIndex,moveLength,[field,turtle])=>{
+	const turtlePosition=t.getPosition(turtle);
+	const edgeStartPosition=field.edgeVectors[edgeIndex].startPosition;
+	const moveVector=
+	      C.shiftVector(moveLength,t.getDirection(turtle));
+	const edgeVector=field.edgeVectors[edgeIndex].shift;
+	const lineParameterOnEdge=
+	      C.innerProduct(
+		  C.perpendicular(moveVector),
+		  C.subtractVector(turtlePosition,edgeStartPosition))
+	      /C.innerProduct(C.perpendicular(moveVector),
+			      edgeVector);
+	const lineParameterOnCourse=
+	      C.innerProduct(
+		  C.perpendicular(edgeVector),
+		  C.subtractVector(edgeStartPosition,turtlePosition))
+	      /C.innerProduct(C.perpendicular(edgeVector),
+			      moveVector);
+	return makeCrossReporter(
+	    lineParameterOnEdge>0
+		&& lineParameterOnEdge<=1
+		&& lineParameterOnCourse>0
+		&& lineParameterOnCourse<=1,	    
+	    edgeIndex, lineParameterOnCourse);
+    });
+
+    const willIntersect=R.curry((moveLength,ft)=>{
+	for(let edgeIndex of U.intList(4)){
+	    const willCross=willCrossEdge(edgeIndex,moveLength,ft);
+	    if(willCross.intersect){
+		return willCross;
+	    }
+	}
+	return makeNoCrossReporter();
+    });
+    
+    const forward=R.curry((length,ft)=>{
+	const acrossEdge=willIntersect(length,ft);
+	if(acrossEdge.intersect){
+	    return forwardAcrossEdge(length,acrossEdge)(ft);
+	}
+	return v.forward(length)(ft);
+    });
+
+    const wrapTurtle=R.curry((wrapEdgeIndex,[field,turtle])=>{
+	const wrapVector=field.edgeVectors[R.mathMod(wrapEdgeIndex+1,4)].shift;
+	return v.shift(wrapVector)([field,turtle]);
+    });
+    
+    const forwardAcrossEdge=R.curry((length,acrossEdge,ft)=>{
+	const [field,turtle]=
+	      R.pipe(v.forward(length*acrossEdge.fraction),
+		     wrapTurtle(acrossEdge.edgeIndex))(ft);
+	const newFT=[shuffleVertices(acrossEdge.edgeIndex)(field),turtle];
+	return forward(length*(1-acrossEdge.fraction))(newFT);
+    });
+    
+    const cubeForward=(length)=>{
+	return forward(length);
+    };
+
+    const poly=R.curry((side,dDirection)=>{
+	return v.repeatForever([forward(side),v.leftTurn(dDirection)]);
     });
     
     return {
+	cubeForward,
 	forward,
-	leftTurn
+	makeNewCubicFieldTurtle,
+	poly
     };
     
     

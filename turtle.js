@@ -110,6 +110,13 @@ module.exports = (()=> {
 	return newTurtle;
     });
 
+    const forwardWithoutDraw=R.curry((distance,turtle)=>{
+	let oldCoordinate=getPosition(turtle);
+	let newTurtle=shiftPosition(distance)(turtle);
+	let newCoordinate=getPosition(newTurtle);
+	return newTurtle;
+    });
+    
     const leftTurn=(dDirection)=>{return turn(dDirection);};
 
     const rightTurn=(dDirection)=>{
@@ -163,6 +170,7 @@ module.exports = (()=> {
 	    setDirection: setDirection,
 	    shiftPosition: shiftPosition,
 	    forward: forward,
+	    forwardWithoutDraw: forwardWithoutDraw,
 	    leftTurn: leftTurn,
 	    rightTurn: rightTurn,
 	    repeat: repeat,

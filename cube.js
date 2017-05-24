@@ -161,7 +161,17 @@ module.exports = (()=> {
   
   const forward=R.curry((length,ft)=>{
     const acrossEdge=willIntersect(length,ft);
+    //console.log(length);
+    //console.log(acrossEdge);
     if(acrossEdge.intersect){
+      /*if(acrossEdge.fraction===0){
+	const newFT=[shuffleVertices(acrossEdge.edgeIndex)(ft[0]),ft[1]];
+	//wrapTurtle(acrossEdge.edgeIndex))(ft);
+      
+	return R.pipe(wrapTurtle(acrossEdge.edgeIndex),
+		      forwardWithoutCrossing(length*1.e-5),
+		      forward(length*(1-1.e-5)))(newFT);
+      }*/
       return forwardAcrossEdge(length,acrossEdge)(ft);
     }
     return forwardWithoutCrossing(length)(ft);
@@ -192,10 +202,14 @@ module.exports = (()=> {
     return forward(length);
   };
 
+  const monogon=R.curry((length,direction)=>{
+    return R.pipe(leftTurn(direction),
+		  v.repeatForever([forward(length)]));
+		  //v.repeat([forward(length)],4));
+  });
   const poly=R.curry((side,dDirection)=>{
-    //return R.pipe(
-    //  v.repeat([forward(side),v.leftTurn(dDirection)],5));
-    return v.repeatForever([forward(side),v.leftTurn(dDirection)]);
+    return v.repeat([forward(side),v.leftTurn(dDirection)],5);
+    //return v.repeatForever([forward(side),v.leftTurn(dDirection)]);
   });
 
   const leftTurn=v.leftTurn;
@@ -261,6 +275,7 @@ module.exports = (()=> {
     forward: forward,
     leftTurn: leftTurn,
     makeNewCubicFieldTurtle: makeNewCubicFieldTurtle,
+    monogon: monogon,
     poly: poly
   };
   

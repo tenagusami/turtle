@@ -160,7 +160,9 @@ module.exports = (()=>{
   //const makeFrame=poly(200,[90]);
   //const moveTurtle=cu.cubeForward(5000);
   //const moveTurtle=cu.poly(250,-144);
-  const moveTurtle=cu.poly(2,-1);
+  //const moveTurtle=cu.poly(2,-1);
+  const moveTurtle=cu.monogon(50,40);
+
   
 
 
@@ -172,7 +174,7 @@ module.exports = (()=>{
     //return moveTurtle(field)(t.newTurtle(draw('#00f')));
     //return moveTurtle([field,t.newTurtle(draw('#00f'))]);
     //let frameResult=makeFrame(field)(t.newTurtle(draw('#00f')));
-    const longitudeLatitude=[20,60];
+    const longitudeLatitude=[40,80];
     cu.drawCubicFrame(200,longitudeLatitude,draw('#0ff'));
     let ft=moveTurtle(
       cu.makeNewCubicFieldTurtle(

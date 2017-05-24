@@ -8,6 +8,7 @@ a.*
 lib*.so
 lib*.so.*
 *.bin
+#*#
 GPATH
 GRTAGS
 GSYMS

@@ -157,9 +157,9 @@ module.exports = (()=>{
     //const moveTurtle=v.gospel(100,[40]);
     //const moveTurtle=tp.scissor(100,40);
     //const moveTurtle=tp.scissorPoly(100,80,100);
-    const makeFrame=poly(200,[90]);
+    //const makeFrame=poly(200,[90]);
     //const moveTurtle=cu.cubeForward(200);
-    const moveTurtle=cu.poly(200,144);
+    const moveTurtle=cu.poly(80,-90);
 
 
 
@@ -169,8 +169,9 @@ module.exports = (()=>{
     const turtleGraphics=(draw,field)=>{
 	//return moveTurtle(field)(t.newTurtle(draw('#00f')));
 	//return moveTurtle([field,t.newTurtle(draw('#00f'))]);
-	let frameResult=makeFrame(field)(t.newTurtle(draw('#00f')));
-	let ft=moveTurtle(cu.makeNewCubicFieldTurtle(200,[50,50],draw('#00f')));
+	//let frameResult=makeFrame(field)(t.newTurtle(draw('#00f')));
+	cu.drawCubicFrame(200,draw('#0ff'));
+	let ft=moveTurtle(cu.makeNewCubicFieldTurtle(200,[150,150],draw('#00f')));
 	return ft;
 
 	//let predator=t.newTurtle(draw('#00f'));

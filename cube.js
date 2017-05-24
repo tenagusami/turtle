@@ -6,6 +6,7 @@ module.exports = (()=> {
     const C=require('./coordinate.js');
     const v=require('./vector.js');
     const t=require('./turtle.js');
+    const p=require('./projection.js');
     
     const permutationSetting = (edge) => {
 	if (edge==='top'){
@@ -18,7 +19,7 @@ module.exports = (()=> {
 	    return [4,0,3,7,5,1,2,6];
 	}
 	if(edge==='left'){
-	    return [3,2,6,7,0,1,5,4];
+	    return [4,5,1,0,7,6,2,3];
 	}
 	return[];
     };
@@ -81,7 +82,8 @@ module.exports = (()=> {
     const makeNewCubicFieldTurtle=R.curry((length,initial2DPosition,draw)=>{
 	return [makeCubicField
 		(length,initialCubeVertices(length),makeEdgeVectors(length)),
-		t.shiftPosition(initial2DPosition)(t.newTurtle(draw))];
+		t.shiftPosition(initial2DPosition)
+		(t.newTurtle(cubicDraw(length,draw)))];
     });
 
     const vertices2DCoordinate = (length)=>{
@@ -161,9 +163,17 @@ module.exports = (()=> {
 	if(acrossEdge.intersect){
 	    return forwardAcrossEdge(length,acrossEdge)(ft);
 	}
-	return v.forward(length)(ft);
+	return forwardWithoutCrossing(length)(ft);
     });
 
+    const forwardWithoutCrossing=R.curry((length,[field,turtle])=>{
+	const oldCoordinate=t.getPosition(turtle);
+	const newTurtle=t.shiftPosition(length)(turtle);
+	const newCoordinate=t.getPosition(newTurtle);
+	turtle.draw(frontVertices(field.vertices),oldCoordinate,newCoordinate);
+	return [field,newTurtle];
+    });
+    
     const wrapTurtle=R.curry((wrapEdgeIndex,[field,turtle])=>{
 	const wrapVector=field.edgeVectors[R.mathMod(wrapEdgeIndex+1,4)].shift;
 	return v.shift(wrapVector)([field,turtle]);
@@ -171,9 +181,11 @@ module.exports = (()=> {
     
     const forwardAcrossEdge=R.curry((length,acrossEdge,ft)=>{
 	const [field,turtle]=
-	      R.pipe(v.forward(length*acrossEdge.fraction),
+	      R.pipe(forwardWithoutCrossing(length*acrossEdge.fraction),
 		     wrapTurtle(acrossEdge.edgeIndex))(ft);
+	//console.log(acrossEdge.edgeIndex);
 	const newFT=[shuffleVertices(acrossEdge.edgeIndex)(field),turtle];
+	//console.log(newFT);
 	return forward(length*(1-acrossEdge.fraction))(newFT);
     });
     
@@ -182,28 +194,76 @@ module.exports = (()=> {
     };
 
     const poly=R.curry((side,dDirection)=>{
+	//return R.pipe(
+	//    v.leftTurn(90),
+	//    v.repeat([forward(side),v.leftTurn(dDirection)],10));
 	return v.repeatForever([forward(side),v.leftTurn(dDirection)]);
     });
 
+    const leftTurn=v.leftTurn;
+    
+    const drawCubicFrame=R.curry((edgeLength,draw2D)=>{
+	const cubeVertices=initialCubeVertices(edgeLength);
+	const cube2DVertices=p.vertice3Dto2D(cubeVertices);
+	draw2D(cube2DVertices[0].coord2D,cube2DVertices[1].coord2D);
+	draw2D(cube2DVertices[1].coord2D,cube2DVertices[2].coord2D);
+	draw2D(cube2DVertices[2].coord2D,cube2DVertices[3].coord2D);
+	draw2D(cube2DVertices[3].coord2D,cube2DVertices[0].coord2D);
+	draw2D(cube2DVertices[0].coord2D,cube2DVertices[4].coord2D);
+	draw2D(cube2DVertices[1].coord2D,cube2DVertices[5].coord2D);
+	draw2D(cube2DVertices[2].coord2D,cube2DVertices[6].coord2D);
+	draw2D(cube2DVertices[3].coord2D,cube2DVertices[7].coord2D);
+	draw2D(cube2DVertices[4].coord2D,cube2DVertices[5].coord2D);
+	draw2D(cube2DVertices[5].coord2D,cube2DVertices[6].coord2D);
+	draw2D(cube2DVertices[6].coord2D,cube2DVertices[7].coord2D);
+	draw2D(cube2DVertices[7].coord2D,cube2DVertices[4].coord2D);
+    });
+    
     const cubicDraw=R.curry((edgeLength,draw2D)=>{
 	const cubeVertices=initialCubeVertices(edgeLength);
+	const cube2DVertices=p.vertice3Dto2D(cubeVertices);
 	return R.curry(
 	    (frontVertices,oldPosition2D,newPosition2D)=>{
-		const faceXVector=
-		      C.subtractVector(frontVertices[3].coord3D,
-				       frontVertices[0].coord3D);
-		const faceYVector=
-		      C.subtractVector(frontVertices[1].coord3D,
-				       frontVertices[0].coord3D);
-		
+		const faceXVectorProjected=
+		      C.subtractVector(
+			  cube2DVertices[frontVertices[3].index].coord2D,
+			  cube2DVertices[frontVertices[0].index].coord2D);
+		const faceYVectorProjected=
+		      C.subtractVector(
+			  cube2DVertices[frontVertices[1].index].coord2D,
+			  cube2DVertices[frontVertices[0].index].coord2D);
+		const oldNormalized=
+		      C.multiplyVector(1/edgeLength,oldPosition2D);
+		const newNormalized=
+		      C.multiplyVector(1/edgeLength,newPosition2D);
+		const projectedOld=
+		      C.addVector(
+			  cube2DVertices[frontVertices[0].index].coord2D,
+			  C.addVector(
+			      C.multiplyVector(
+				  oldNormalized[0],faceXVectorProjected),
+			      C.multiplyVector(
+				  oldNormalized[1],faceYVectorProjected)));
+		const projectedNew=
+		      C.addVector(
+			  cube2DVertices[frontVertices[0].index].coord2D,
+			  C.addVector(
+			      C.multiplyVector(
+				  newNormalized[0],faceXVectorProjected),
+			      C.multiplyVector(
+				  newNormalized[1],faceYVectorProjected)));
+		draw2D(projectedOld,projectedNew);
 	    });
     });
     
     return {
-	cubeForward,
-	forward,
-	makeNewCubicFieldTurtle,
-	poly
+	cubeForward: cubeForward,
+	cubicDraw: cubicDraw,
+	drawCubicFrame: drawCubicFrame,
+	forward: forward,
+	leftTurn: leftTurn,
+	makeNewCubicFieldTurtle: makeNewCubicFieldTurtle,
+	poly: poly
     };
     
     

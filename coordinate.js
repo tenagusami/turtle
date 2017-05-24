@@ -8,75 +8,79 @@ module.exports = (()=> {
     const deg2Rad=math.pi/180;
     const rad2Deg=1/deg2Rad;
 
-    const origin=U.intList(dimensionarity).fill(0);
+    const origin=(dim=2)=>{return U.intList(dim).fill(0);};
 
-    const addPosition=R.curry((position1,position2)=>{
-	return U.intList(dimensionarity)
+    const addPosition=R.curry((position1,position2,dim=2)=>{
+	return U.intList(dim)
 	    .map((index)=>{return position1[index]+position2[index];});
     });
 
-    const distanceBetween=R.curry((position1,position2)=>{
-	return math.sqrt(U.intList(dimensionarity)
+    const distanceBetween=R.curry((position1,position2,dim=2)=>{
+	return math.sqrt(U.intList(dim)
 			 .map((index)=>{return Math.pow(position1[index]-position2[index],2);})
 			 .reduce(R.add,0));
     });
     
-    const shiftVector=R.curry((distance,direction)=>{
+    const shiftVector=R.curry((distance,direction,dim=2)=>{
 	return [
 	    distance*Math.cos(direction[0]*deg2Rad),
 	    distance*Math.sin(direction[0]*deg2Rad)
 	];
     });
 
-    const vectorTo=R.curry((positionFrom,positionTo)=>{
-	return U.intList(dimensionarity)
+    const vectorTo=R.curry((positionFrom,positionTo,dim=2)=>{
+	return U.intList(dim)
 	    .map((index)=>{return positionTo[index]-positionFrom[index];});
     });
     
-    const directionTo=R.curry((positionFrom,positionTo)=>{
-	const vector=vectorTo(positionFrom,positionTo);
+    const directionTo=R.curry((positionFrom,positionTo,dim=2)=>{
+	const vector=vectorTo(positionFrom,positionTo,dim);
 	return [math.atan2(vector[1],vector[0])*rad2Deg]
 	    .map(U.rMathModulo(360));
 	;
     });
 
-    const isSamePosition=R.curry((position1,position2)=>{
+    const isSamePosition=R.curry((position1,position2,dim=2)=>{
 	return R.all(
 	    (index)=>{return position1[index]===position2[index];},
-	    U.intList(dimensionarity));
+	    U.intList(dim));
     });
 
-    const shiftDirection=R.curry((direction, dDirection)=>{
-	if(dimensionarity===2){
+    const shiftDirection=R.curry((direction, dDirection,dim=2)=>{
+	if(dim===2){
 	    if(typeof(dDirection)==='number'){
-		return shiftDirection(direction,[dDirection]);
+		return shiftDirection(direction,[dDirection],dim);
 	    }
 	    if (typeof(direction)==='number'){
-		return shiftDirection([direction],dDirection);
+		return shiftDirection([direction],dDirection,dim);
 	    }
 	}
 	return R.zipWith(R.add,direction,dDirection)
 	    .map(U.rMathModulo(360));
     });
 
-    const subtractDirection=R.curry((direction, dDirection)=>{
-	return shiftDirection(direction,negateDirection(dDirection));
+    const subtractDirection=R.curry((direction, dDirection,dim=2)=>{
+	return shiftDirection(direction,negateDirection(dDirection),dim);
     });
 
-    const multiplyDirection=R.curry((factor,direction)=>{
-	if(typeof(direction)==='number' && dimensionarity===2){
+    const multiplyDirection=R.curry((factor,direction,dim=2)=>{
+	if(typeof(direction)==='number' && dim===2){
 	    return [U.rMathModulo(360,factor*direction)];
 	}
 	return direction.map(
 	    R.pipe(R.multiply(factor),U.rMathModulo(360)));
     });
 
+    const multiplyVector=R.curry((factor,vector)=>{
+	return vector.map(R.multiply(factor));
+    });
+
     const negateVector=R.map(R.negate);
 
     const addVector=addPosition;
 
-    const subtractVector=R.curry((vector1,vector2)=>{
-	return addVector(vector1,negateVector(vector2));
+    const subtractVector=R.curry((vector1,vector2,dim=2)=>{
+	return addVector(vector1,negateVector(vector2),dim);
     });
     
     const negateDirection=(direction)=>{
@@ -87,27 +91,27 @@ module.exports = (()=> {
 	return [args[0]];
     });
 
-    const innerProduct = R.curry((vector1,vector2)=>{
-	return U.intList(dimensionarity)
+    const innerProduct = R.curry((vector1,vector2,dim=2)=>{
+	return U.intList(dim)
 	    .reduce((reduced,index)=>{
 		return reduced+vector1[index]*vector2[index];
 	    },0);
     });
 
-    const perpendicular=(vector)=>{
+    const perpendicular=(vector,dim=2)=>{
 	return [-vector[1],vector[0]];
     };
 
     return {
 	addPosition: addPosition,
 	addVector: addVector,
-	dimensionarity: dimensionarity,
 	directionTo: directionTo,
 	distanceBetween: distanceBetween,
 	innerProduct: innerProduct,
 	isSamePosition: isSamePosition,
 	makeDirection: makeDirection,
 	multiplyDirection: multiplyDirection,
+	multiplyVector: multiplyVector,
 	negateDirection: negateDirection,
 	negateVector: negateVector,
 	origin: origin,

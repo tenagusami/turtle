@@ -8,7 +8,7 @@ module.exports = (()=> {
     const penDownFlag=true;
     const penUpFlag=false;
     
-    const initialPosition = C.origin;
+    const initialPosition = C.origin();
 
     const initialDirection = ()=>{
 	return [90];

@@ -44,7 +44,7 @@ module.exports = (()=> {
   };
   
   const permuteVertices=R.curry((crossingEdgeName,vertices)=>{
-    let p=permutationSetting(crossingEdgeName);
+    const p=permutationSetting(crossingEdgeName);
     return [vertices[p[0]],
 	    vertices[p[1]],
 	    vertices[p[2]],
@@ -117,8 +117,8 @@ module.exports = (()=> {
   const makeNoCrossReporter=()=>{
     return makeCrossReporter(false,-1,-1);
   };
-  
-  const willCrossEdge=R.curry((edgeIndex,moveLength,[field,turtle])=>{
+
+  const getLineParameters=R.curry((edgeIndex,moveLength,[field,turtle])=>{
     const turtlePosition=t.getPosition(turtle);
     const edgeStartPosition=field.edgeVectors[edgeIndex].startPosition;
     const moveVector=
@@ -141,9 +141,14 @@ module.exports = (()=> {
 	    C.subtractVector(edgeStartPosition,turtlePosition))
 	  /C.innerProduct(C.perpendicular(edgeVector),
 			  moveVector);
+    return [lineParameterOnEdge,lineParameterOnCourse];
+  });
+  
+  const willCrossEdge=R.curry((edgeIndex,moveLength,[field,turtle])=>{
+    const [lineParameterOnEdge,lineParameterOnCourse]=
+	  getLineParameters(edgeIndex,moveLength,[field,turtle]);
     if(U.isOnInterval(0,1,lineParameterOnEdge)){
-      if(lineParameterOnCourse>0
-	 && lineParameterOnCourse<1){
+      if(lineParameterOnCourse>0 && lineParameterOnCourse<1){
 	return makeCrossReporter(true,edgeIndex, lineParameterOnCourse);
       }else if(lineParameterOnCourse===0
 	       && isBeyondEdge(t.getDirection(turtle),edgeIndex)){
@@ -210,8 +215,8 @@ module.exports = (()=> {
   const monogon=R.curry((length,direction)=>{
     return R.pipe(leftTurn(direction),
 		  v.repeatForever([forward(length)]));
-		  //v.repeat([forward(length)],4));
   });
+
   const poly=R.curry((side,direction,dDirection)=>{
     return R.pipe(
       leftTurn(direction),

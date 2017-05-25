@@ -169,19 +169,25 @@ module.exports = (()=>{
   
   
   const turtleGraphics=(draw,field)=>{
+    //for a turtle on a plane
     //return moveTurtle(field)(t.newTurtle(draw('#00f')));
     //return moveTurtle([field,t.newTurtle(draw('#00f'))]);
-    //let frameResult=makeFrame(field)(t.newTurtle(draw('#00f')));
-    const longitudeLatitude=[-70,80];
-    cu.drawCubicFrame(200,longitudeLatitude,draw('#0ff'));
-    let ft=moveTurtle(
-      cu.makeNewCubicFieldTurtle(
-	200,[150,150],longitudeLatitude,draw('#00f')));
-    return ft;
 
+    //for 2 turtles on a plane
     //let predator=t.newTurtle(draw('#00f'));
     //let prey=t.newTurtle(draw('#f00'),[100,0]);
     //return move2Turtles(field,predator,prey);
+
+    //for a turtle on a cube 
+    //let frameResult=makeFrame(field)(t.newTurtle(draw('#00f')));
+    const viewLongitudeLatitude=[-70,80];
+    const edgeLength=200;
+    const initialPositionOnFace=[150,150];
+    cu.drawCubicFrame(edgeLength,viewLongitudeLatitude,draw('#0ff'));
+    const ft=moveTurtle(
+      cu.makeNewCubicFieldTurtle(
+	edgeLength,initialPositionOnFace,viewLongitudeLatitude,draw('#00f')));
+    return ft;
   };
 
   

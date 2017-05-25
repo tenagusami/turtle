@@ -145,30 +145,8 @@ module.exports = (()=> {
   });
   
   const willCrossEdge=R.curry((edgeIndex,moveLength,[field,turtle])=>{
-    /*const [lineParameterOnEdge,lineParameterOnCourse]=
-      getLineParameters(edgeIndex,moveLength,[field,turtle]);*/
-    const turtlePosition=t.getPosition(turtle);
-    const edgeStartPosition=field.edgeVectors[edgeIndex].startPosition;
-    const moveVector=
-	  C.shiftVector(moveLength,t.getDirection(turtle));
-    const edgeVector=field.edgeVectors[edgeIndex].shift;
-    const lineParameterOnEdgeDenominator=
-	  C.innerProduct(C.perpendicular(moveVector),
-			 edgeVector);
-    if(Math.abs(lineParameterOnEdgeDenominator)<1.e-8){
-      return makeNoCrossReporter();
-    }
-    const lineParameterOnEdge=
-	  C.innerProduct(
-	    C.perpendicular(moveVector),
-	    C.subtractVector(turtlePosition,edgeStartPosition))
-	  /lineParameterOnEdgeDenominator;
-    const lineParameterOnCourse=
-	  C.innerProduct(
-	    C.perpendicular(edgeVector),
-	    C.subtractVector(edgeStartPosition,turtlePosition))
-	  /C.innerProduct(C.perpendicular(edgeVector),
-			  moveVector);
+      const [lineParameterOnEdge,lineParameterOnCourse]=
+	    getLineParameters(edgeIndex,moveLength,[field,turtle]);
     if(U.isOnInterval(0,1,lineParameterOnEdge)){
       if(lineParameterOnCourse>0 && lineParameterOnCourse<1){
 	return makeCrossReporter(true,edgeIndex, lineParameterOnCourse);

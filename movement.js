@@ -186,10 +186,10 @@ module.exports = (()=>{
     const edgeLength=200;
     const initialPositionOnFace=[150,150];
     cu.drawCubicFrame(edgeLength,viewLongitudeLatitude,draw('#0ff'));
-    //const ft=moveTurtle(
-    //  cu.makeNewCubicFieldTurtle(
-	//edgeLength,initialPositionOnFace,viewLongitudeLatitude,draw('#00f')));
-    return ft;
+      const ft=moveTurtle(
+	  cu.makeNewCubicFieldTurtle(
+	      edgeLength,initialPositionOnFace,viewLongitudeLatitude,draw('#00f')));
+      return ft;
 
     //for a turtle on a sphere
     /*const viewLongitudeLatitude=[0,-10];

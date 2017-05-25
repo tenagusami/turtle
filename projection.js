@@ -26,7 +26,7 @@ module.exports = (()=> {
   
   const longLatParallelProjectionCube=R.curry(
     (longitude,latitude,vertices)=>{
-      const projectorVertex=projector(longitude,latitude);
+      const projectorVertex=projector([longitude,latitude]);
       return vertices.map((vertex)=>{
 	return {coord2D: projectorVertex(vertex.coord3D)};
       });

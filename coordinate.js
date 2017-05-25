@@ -118,6 +118,7 @@ module.exports = (()=> {
     negateVector: negateVector,
     origin: origin,
     perpendicular: perpendicular,
+    rad2Deg: rad2Deg,
     shiftDirection: shiftDirection,
     shiftVector: shiftVector,
     subtractDirection: subtractDirection,

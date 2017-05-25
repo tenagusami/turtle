@@ -4,6 +4,7 @@ module.exports = (()=>{
   const U=require('./utility.js');
   const R=require('ramda');
   const t=require('./turtle.js');
+  const math=require('mathjs');
   const f=require('./field.js');
   const C=require('./coordinate.js');
   const a=require('./animalTurtle.js');
@@ -159,13 +160,10 @@ module.exports = (()=>{
   //const moveTurtle=tp.scissorPoly(100,80,100);
   //const makeFrame=poly(200,[90]);
   //const moveTurtle=cu.cubeForward(5000);
-  //const moveTurtle=cu.poly(250,-144);
-  //const moveTurtle=cu.poly(2,-1);
-  const moveTurtle=cu.monogon(50,40);
-
-  
-
-
+  //const moveTurtle=cu.poly(250,0,-144);
+  const moveTurtle=cu.poly(200,20,90);
+  //const moveTurtle=cu.poly(2,0,-1);
+  //const moveTurtle=cu.monogon(50,math.atan(11)*C.rad2Deg);
 
   const move2Turtles=a.predatorPrey;
   
@@ -174,7 +172,7 @@ module.exports = (()=>{
     //return moveTurtle(field)(t.newTurtle(draw('#00f')));
     //return moveTurtle([field,t.newTurtle(draw('#00f'))]);
     //let frameResult=makeFrame(field)(t.newTurtle(draw('#00f')));
-    const longitudeLatitude=[40,80];
+    const longitudeLatitude=[-70,80];
     cu.drawCubicFrame(200,longitudeLatitude,draw('#0ff'));
     let ft=moveTurtle(
       cu.makeNewCubicFieldTurtle(

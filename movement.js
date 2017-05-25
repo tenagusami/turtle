@@ -12,6 +12,7 @@ module.exports = (()=>{
   const v=require('./vector.js');
   const tp=require('./topology.js');
   const cu=require('./cube.js');
+  const sp=require('./sphere.js');
   
   const poly=R.curry((side,direction,field)=>{
     return t.repeat(R.pipe(t.forward(side),t.rightTurn(direction)));
@@ -161,10 +162,11 @@ module.exports = (()=>{
   //const makeFrame=poly(200,[90]);
   //const moveTurtle=cu.cubeForward(5000);
   //const moveTurtle=cu.poly(250,0,-144);
-  const moveTurtle=cu.poly(200,20,90);
+  //const moveTurtle=cu.poly(200,20,90);
   //const moveTurtle=cu.poly(2,0,-1);
   //const moveTurtle=cu.monogon(50,math.atan(11)*C.rad2Deg);
-
+  const moveTurtle=R.pipe(sp.leftTurn(45),sp.forward(180));
+  
   const move2Turtles=a.predatorPrey;
   
   
@@ -180,14 +182,25 @@ module.exports = (()=>{
 
     //for a turtle on a cube 
     //let frameResult=makeFrame(field)(t.newTurtle(draw('#00f')));
-    const viewLongitudeLatitude=[-70,80];
-    const edgeLength=200;
-    const initialPositionOnFace=[150,150];
-    cu.drawCubicFrame(edgeLength,viewLongitudeLatitude,draw('#0ff'));
+    //const viewLongitudeLatitude=[-70,80];
+    //const edgeLength=200;
+    //const initialPositionOnFace=[150,150];
+    //cu.drawCubicFrame(edgeLength,viewLongitudeLatitude,draw('#0ff'));
+    //const ft=moveTurtle(
+    //  cu.makeNewCubicFieldTurtle(
+	//edgeLength,initialPositionOnFace,viewLongitudeLatitude,draw('#00f')));
+    //return ft;
+
+    //for a turtle on a sphere
+    const viewLongitudeLatitude=[0,-10];
+    const radius=200;
+    sp.drawSphericalFrame(radius,viewLongitudeLatitude,draw('#0ff'));
     const ft=moveTurtle(
-      cu.makeNewCubicFieldTurtle(
-	edgeLength,initialPositionOnFace,viewLongitudeLatitude,draw('#00f')));
+      sp.makeNewFieldTurtle(
+	radius,viewLongitudeLatitude,draw('#00f')));
     return ft;
+
+    
   };
 
   

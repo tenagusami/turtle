@@ -24,14 +24,17 @@ module.exports = (()=> {
     ];
   };
   
-  const longLatParallelProjection=R.curry(
+  const longLatParallelProjectionCube=R.curry(
     (longitude,latitude,vertices)=>{
-      const projector=coord3D2Projected2D(longitude,latitude);
+      const projectorVertex=projector(longitude,latitude);
       return vertices.map((vertex)=>{
-	return {coord2D: projector(vertex.coord3D)};
+	return {coord2D: projectorVertex(vertex.coord3D)};
       });
     });
 
+  const projector=R.curry(([longitude,latitude])=>{
+    return coord3D2Projected2D(longitude,latitude);
+  });
   
   const coord3D2Projected2D=R.curry((longitude,latitude)=>{
     return (vector3D)=>{
@@ -45,10 +48,11 @@ module.exports = (()=> {
   });
 
   //const vertice3Dto2D=testFixProjection;
-  const vertice3Dto2D=longLatParallelProjection;
+  const vertice3Dto2D=longLatParallelProjectionCube;
   
 
   return {
+    projector: projector,
     vertice3Dto2D: vertice3Dto2D
   };
   

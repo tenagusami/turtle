@@ -11,7 +11,7 @@ module.exports = (()=>{
   const rec=require('./recursiveDesign.js');
   const v=require('./vector.js');
   const tp=require('./topology.js');
-  const cu=require('./cube.js');
+  const りっぽうたい=require('./cube.js');
   const sp=require('./sphere.js');
   
   const poly=R.curry((side,direction,field)=>{
@@ -164,32 +164,35 @@ module.exports = (()=>{
 //  const moveTurtle=cu.poly(250,0,-144);
   //const moveTurtle=cu.poly(200,20,90);
   //const moveTurtle=cu.poly(2,0,-1);
-  const moveTurtle=cu.monogon(50,math.atan(11)*C.rad2Deg);
+  const うごかす=りっぽうたい.一へんけい(50,math.atan(11)*C.rad2Deg);
 //  const moveTurtle=R.pipe(sp.leftTurn(45),sp.forward(180));
   
   const move2Turtles=a.predatorPrey;
   
   
-  const turtleGraphics=(draw,field)=>{
+  const turtleGraphics=(かく,field)=>{
     //for a turtle on a plane
-    //return moveTurtle(field)(t.newTurtle(draw('#00f')));
-    //return moveTurtle([field,t.newTurtle(draw('#00f'))]);
+    //return moveTurtle(field)(t.newTurtle(かく('#00f')));
+    //return moveTurtle([field,t.newTurtle(かく('#00f'))]);
 
     //for 2 turtles on a plane
-    //let predator=t.newTurtle(draw('#00f'));
-    //let prey=t.newTurtle(draw('#f00'),[100,0]);
+    //let predator=t.newTurtle(かく('#00f'));
+    //let prey=t.newTurtle(かく('#f00'),[100,0]);
     //return move2Turtles(field,predator,prey);
 
     //for a turtle on a cube 
     //let frameResult=makeFrame(field)(t.newTurtle(draw('#00f')));
-    const viewLongitudeLatitude=[-70,80];
-    const edgeLength=200;
-    const initialPositionOnFace=[150,150];
-    cu.drawCubicFrame(edgeLength,viewLongitudeLatitude,draw('#0ff'));
-      const ft=moveTurtle(
-	  cu.makeNewCubicFieldTurtle(
-	      edgeLength,initialPositionOnFace,viewLongitudeLatitude,draw('#00f')));
-      return ft;
+    const 見るほうこうのいどけいど=[-70,80];
+    const へんのながさ=200;
+    const はじめのばしょ=[150,150];
+    const いろ1='#00f';
+    const いろ2='#0ff';
+    りっぽうたい.あたらしいさいころをかく(
+      へんのながさ,見るほうこうのいどけいど,かく(いろ2));
+    const めんとかめ=うごかす(
+      りっぽうたい.あたらしいめんとかめをつくる(
+	へんのながさ,はじめのばしょ,見るほうこうのいどけいど,かく(いろ1)));
+    return めんとかめ;
 
     //for a turtle on a sphere
     /*const viewLongitudeLatitude=[0,-10];

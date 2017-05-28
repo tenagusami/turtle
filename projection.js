@@ -43,7 +43,7 @@ module.exports = (()=> {
       const vector3D2=[vector2D2[0],vector2D2[1],vector3D[2]];
       const vector2D3=[vector3D2[1],vector3D2[2]];
       const vector2D4=v.rotate(-latitude,vector2D3);
-      return [vector3D2[0],vector2D4[0],vector2D4[1]];
+      return [vector3D2[0],vector2D4[0]];//,vector2D4[1]];
     };
   });
 

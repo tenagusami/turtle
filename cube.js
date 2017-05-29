@@ -145,8 +145,6 @@ module.exports = (()=> {
   });
   
   const willCrossEdge=R.curry((edgeIndex,moveLength,[field,turtle])=>{
-    /*const [lineParameterOnEdge,lineParameterOnCourse]=
-      getLineParameters(edgeIndex,moveLength,[field,turtle]);*/
     const turtlePosition=t.getPosition(turtle);
     const edgeStartPosition=field.edgeVectors[edgeIndex].startPosition;
     const moveVector=

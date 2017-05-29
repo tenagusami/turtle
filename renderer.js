@@ -64,19 +64,20 @@ myCanvas.addEventListener('mousemove', (event) => {
  */
 
 const drawer=R.curry((color,startCoordinate, endCoordinate)=>{
-  
-  let startPoint = { x:startCoordinate[0]+offset.x,
-		     y:-startCoordinate[1]+offset.y};
-  let endPoint = { x:endCoordinate[0]+offset.x,
-		   y:-endCoordinate[1]+offset.y};
-  drawing=true;
-  ctx.strokeStyle = color;
-  ctx.lineWidth = lineWidth;
-  ctx.beginPath();
-  ctx.moveTo(startPoint.x, startPoint.y);
-  ctx.lineTo(endPoint.x, endPoint.y);
-  ctx.stroke();
-  drawing=false;
+  window.setTimeout(()=>{
+    const startPoint = { x:startCoordinate[0]+offset.x,
+		       y:-startCoordinate[1]+offset.y};
+    const endPoint = { x:endCoordinate[0]+offset.x,
+		     y:-endCoordinate[1]+offset.y};
+    drawing=true;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    ctx.moveTo(startPoint.x, startPoint.y);
+    ctx.lineTo(endPoint.x, endPoint.y);
+    ctx.stroke();
+    drawing=false;
+  },0);
 });
 
 

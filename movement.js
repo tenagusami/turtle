@@ -14,49 +14,49 @@ module.exports = (()=>{
   const りっぽうたい=require('./cube.js');
   const sp=require('./sphere.js');
   
-  const poly=R.curry((side,direction,field)=>{
-    return t.repeat(R.pipe(t.forward(side),t.rightTurn(direction)));
+  const poly=R.curry((side,direction)=>{
+    return v.repeat([v.forward(side),v.rightTurn(direction)],10);
   });
 
-  const newPoly=R.curry((side,direction,field)=>{
-    return t.repeat(R.pipe(t.forward(side),
-			   t.rightTurn(direction),
-			   t.forward(side),
-			   t.rightTurn(direction.map(R.multiply(2)))));
+  const newPoly=R.curry((side,direction)=>{
+    return v.repeat([v.forward(side),
+		     v.rightTurn(direction),
+		     v.forward(side),
+		     v.rightTurn(direction*2)],10);
   });
 
-  const polySpiral=R.curry((side,direction,increment,field)=>{
+  const polySpiral=R.curry((side,direction,increment)=>{
     const polySpiralIter=R.curry((side,direction,increment,depth)=>{
       if(depth===0){return R.identity;}
       return R.pipe(
-	t.forward(side),t.rightTurn(direction),
+	v.forward(side),v.rightTurn(direction),
 	polySpiralIter(side+increment,direction,increment,depth-1));
       
     });
     return polySpiralIter(side,direction,increment,1000);
   });
   
-  const inwardSpiral=R.curry((side,direction,increment,field)=>{
+  const inwardSpiral=R.curry((side,direction,increment)=>{
     const inwardSpiralIter=R.curry((direction,depth)=>{
       if(depth===0){return R.identity;}
       return R.pipe(
-	t.forward(side),t.rightTurn(direction),
-	inwardSpiralIter([direction[0]+increment],depth-1));
+	v.forward(side),v.rightTurn(direction),
+	inwardSpiralIter(direction+increment,depth-1));
       
     });
     return inwardSpiralIter(direction,1000);
   });
 
-  const spiro=R.curry((side,direction,max,field)=>{
+  const spiro=R.curry((side,direction,max)=>{
     const subspiro=R.curry((side,direction,max,count)=>{
       if(count>max){return R.identity;}
-      return R.pipe(t.forward(side*count),t.rightTurn(direction),
+      return R.pipe(v.forward(side*count),v.rightTurn(direction),
 		    subspiro(side,direction,max,count+1));
     });
-    return t.repeat(subspiro(side,direction,max,1));
+    return v.repeat([subspiro(side,direction,max,1)],1000);
   });
 
-  const gspiro=R.curry((side,direction,max,list,field)=>{
+  const gspiro=R.curry((side,direction,max,list)=>{
     const subgspiro=R.curry((side,direction,max,count)=>{
       if(count>max){return R.identity;}
       let turn=undefined;
@@ -65,72 +65,71 @@ module.exports = (()=>{
 	  if(element===count){return element;}
 	  return false;
 	})){
-	turn=t.leftTurn;
+	turn=v.leftTurn;
       }else{
-	turn=t.rightTurn;
+	turn=v.rightTurn;
       }	
-      return R.pipe(t.forward(side*count),turn(direction),
+      return R.pipe(v.forward(side*count),turn(direction),
 		    subgspiro(side,direction,max,count+1));
     });
-    return t.repeat(subgspiro(side,direction,max,1));
+    return v.repeat([subgspiro(side,direction,max,1)],1000);
   });
   
   const genGspiro=()=>{
     const r=2;
     const n=5;
-    return gspiro(10,[360*257/7],11,[3,4,6,7]);
+    return gspiro(10,360*257/7,11,[3,4,6,7]);
   };
 
   const randomMove=R.curry(
-    (distanceMin,distanceMax,directionMin,directionMax,field)=>{
+    (distanceMin,distanceMax,directionMin,directionMax,ft)=>{
       const randomMoveIter=R.curry(
-	(randomD,randomA,count,turtleOld)=>{
-	  if(count==0){return turtleOld;}
+	(randomD,randomA,count,ft)=>{
+	  if(count==0){return ft;}
 	  return randomMoveIter(
 	    U.randomR(distanceMin,distanceMax),
-	    [U.randomR(directionMin,directionMax)],
+	    U.randomR(directionMin,directionMax),
 	    count-1,
-	    R.pipe(checkForward(randomD,field),t.leftTurn([randomA]))
-	    (turtleOld));
+	    R.pipe(checkForward(randomD),v.leftTurn(randomA))(ft));
 	});
       return randomMoveIter(
 	U.randomR(distanceMin,distanceMax),
-	[U.randomR(directionMin,directionMax)],
-	1000);
+	U.randomR(directionMin,directionMax),
+	1000)(ft);
     });
 
-  const checkForward=R.curry((distance,field,turtle)=>{
+  const checkForward=R.curry((distance,[field,turtle])=>{
     if(f.isMovable(
       field,t.getPosition(turtle),distance,t.getDirection(turtle))){
-      return t.forward(distance,turtle);
+      return v.forward(distance,[field,turtle]);
     }
-    //return turtle;
-    //return t.rightTurn([180])(turtle);
-    return wriggle(field,distance,turtle);
+    //return [field,turtle];
+    return v.rightTurn(180)([field,turtle]);
+    //return wriggle(distance,[field,turtle]);
   });
 
-  const wriggle=R.curry((field,distance,turtle)=>{
+  const wriggle=R.curry((distance,[field,turtle])=>{
     if(f.isMovable(field,t.getPosition(turtle),
 		   distance,t.getDirection(turtle))){
-      return turtle;
+      return [field,turtle];
     }
     return wriggle(
-      field,distance,
-      R.pipe(t.rightTurn([1]),t.forward(1))(turtle));
+      distance,
+      R.pipe(v.rightTurn(1),v.forward(1))([field,turtle]));
   });
 
   const scaledForward=R.curry((scale,distance)=>{
-    return t.forward(scale*distance);});
-
+    return v.forward(scale*distance);});
+  
   const growScale=R.multiply;
 
-  //const moveTurtle=poly(100,[90]);
-  //const moveTurtle=newPoly(50,[144]);
-  //const moveTurtle=polySpiral(100,[95],1);
-  //const moveTurtle=inwardSpiral(20,[0],7);
-  //const moveTurtle=spiro(10,[60],10);
+  //const moveTurtle=poly(100,144);
+  //const moveTurtle=newPoly(50,144);
+  //const moveTurtle=polySpiral(100,95,1);
+  //const moveTurtle=inwardSpiral(20,0,7);
+  //const moveTurtle=spiro(10,60,10);
   //const moveTurtle=genGspiro();
-  //const moveTurtle=randomMove(0,10,-10,10);
+  const moveTurtle=randomMove(0,10,-10,10);
   //const moveTurtle=a.findBySmell2([30]);
   //const moveTurtle=a.findBySmell3([60],120);
   //const moveTurtle=a.varyingStep(1000,[10]);
@@ -164,35 +163,35 @@ module.exports = (()=>{
 //  const moveTurtle=cu.poly(250,0,-144);
   //const moveTurtle=cu.poly(200,20,90);
   //const moveTurtle=cu.poly(2,0,-1);
-  const うごかす=りっぽうたい.一へんけい(50,math.atan(11)*C.rad2Deg);
+  //const うごかす=りっぽうたい.一へんけい(50,math.atan(11)*C.rad2Deg);
 //  const moveTurtle=R.pipe(sp.leftTurn(45),sp.forward(180));
   
   const move2Turtles=a.predatorPrey;
   
   
-  const turtleGraphics=(かく,field)=>{
+  const turtleGraphics=(draw,field)=>{
     //for a turtle on a plane
-    //return moveTurtle(field)(t.newTurtle(かく('#00f')));
-    //return moveTurtle([field,t.newTurtle(かく('#00f'))]);
+    //return moveTurtle(field)(t.newTurtle(draw('#00f')));
+    return moveTurtle([field,t.newTurtle(draw('#00f'))]);
 
     //for 2 turtles on a plane
-    //let predator=t.newTurtle(かく('#00f'));
-    //let prey=t.newTurtle(かく('#f00'),[100,0]);
+    //let predator=t.newTurtle(draw('#00f'));
+    //let prey=t.newTurtle(draw('#f00'),[100,0]);
     //return move2Turtles(field,predator,prey);
 
     //for a turtle on a cube 
     //let frameResult=makeFrame(field)(t.newTurtle(draw('#00f')));
-    const 見るほうこうのいどけいど=[-70,80];
-    const へんのながさ=200;
-    const はじめのばしょ=[150,150];
-    const いろ1='#00f';
-    const いろ2='#0ff';
-    りっぽうたい.あたらしいさいころをかく(
-      へんのながさ,見るほうこうのいどけいど,かく(いろ2));
-    const めんとかめ=うごかす(
-      りっぽうたい.あたらしいめんとかめをつくる(
-	へんのながさ,はじめのばしょ,見るほうこうのいどけいど,かく(いろ1)));
-    return めんとかめ;
+    //const 見るほうこうのいどけいど=[-70,80];
+    //const へんのながさ=200;
+    //const はじめのばしょ=[150,150];
+    //const いろ1='#00f';
+    //const いろ2='#0ff';
+   // りっぽうたい.あたらしいさいころをdraw(
+     // へんのながさ,見るほうこうのいどけいど,draw(いろ2));
+    //const めんとかめ=うごかす(
+    //  りっぽうたい.あたらしいめんとかめをつくる(
+//	へんのながさ,はじめのばしょ,見るほうこうのいどけいど,draw(いろ1)));
+    //return めんとかめ;
 
     //for a turtle on a sphere
     /*const viewLongitudeLatitude=[0,-10];
